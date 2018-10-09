@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Hardware;
 
+import org.firstinspires.ftc.teamcode.Intake;
 import org.firstinspires.ftc.teamcode.Wheels;
 
 @TeleOp(name="Testing teleOP")
@@ -13,11 +14,13 @@ public class myTeleOp extends OpMode {
   private ElapsedTime runtime = new ElapsedTime();
   //private DcMotor leftDrive = null;
   private Wheels mecanum = new Wheels();
+  private Intake intake = new Intake();
 
 
   @Override
   public void init(){
     mecanum.init(hardwareMap);
+    intake.init(hardwareMap);
   }
 
   @Override
@@ -39,12 +42,14 @@ public class myTeleOp extends OpMode {
 
     telemetry.addData("Status", "Initialized");
     updateWheels();
+    updateIntake();
 
     }
 
   @Override
   public void stop(){
     mecanum.stop();
+    intake.stop();
   }
 
 
@@ -66,4 +71,16 @@ public class myTeleOp extends OpMode {
     telemetry.addData("Wheel","Wheel power: D: %.2f S: %.2f R: %.2f", drive, strafe, rotate);
   }
 
+  public void updateIntake(){
+
+    boolean on = gamepad1.right_bumper;
+    boolean off = gamepad1.left_bumper;
+
+    if(on){
+      intake.turnOn();
+    } else if(off){
+      intake.turnOff();
+    }
+
+  }
 }

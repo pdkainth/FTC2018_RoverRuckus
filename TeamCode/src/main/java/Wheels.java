@@ -35,7 +35,6 @@ public class Wheels {
         backLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
     }
 
     public void drive(double drive, double strafe, double rotate, Telemetry telemetry){
