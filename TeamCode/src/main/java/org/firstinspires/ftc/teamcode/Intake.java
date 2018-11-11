@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoControllerEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -14,9 +16,28 @@ public class Intake {
     private CRServo intakeServo;
     private double power;
 
+    private Servo transferServo;
+    private double currentPosition;
+    private static final double DOWN_POSITION = 0.325;
+    private static final double UP_POSITION = 0.675;
+    private ServoControllerEx controller;
+    private int               port;
+
+    private ElapsedTime       elapsedTime;
+
     public void init(HardwareMap hardwareMap){
       intakeServo = hardwareMap.get(CRServo.class, "CRservo0");
       intakeServo.setDirection(DcMotorSimple.Direction.FORWARD);
+
+      transferServo = hardwareMap.get(Servo.class, "Servo1");
+      transferServo.setDirection(Servo.Direction.FORWARD);
+      controller = (ServoControllerEx) transferServo.getController();
+      port = transferServo.getPortNumber();
+
+      elapsedTime = new ElapsedTime();
+      elapsedTime.reset();
+
+      goUp();
       stop();
     }
 
@@ -30,8 +51,36 @@ public class Intake {
       intakeServo.setPower(power);
     }
 
+    public void goUp(){
+      currentPosition = UP_POSITION;
+      applyTransferPos();
+
+    }
+
+    public void goDown(){
+      currentPosition = DOWN_POSITION;
+      applyTransferPos();
+    }
+
+    public void applyTransferPos() {
+      controller.setServoPwmEnable(port);
+      transferServo.setPosition(currentPosition);
+      elapsedTime.reset();
+    }
+
     public void update(Telemetry telemetry){
+
+      boolean on = controller.isServoPwmEnabled(port);
+
+      if (on) {
+        if (elapsedTime.milliseconds() > 2000.0) {
+          controller.setServoPwmDisable(port);
+          on = false;
+        }
+      }
+
       telemetry.addData("IntakeSpinner","power %.2f", power);
+      telemetry.addData("TransferServo", "position" + currentPosition + " power " + on);
     }
 
     public void stop(){

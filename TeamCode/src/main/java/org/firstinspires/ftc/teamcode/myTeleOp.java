@@ -16,6 +16,8 @@ public class myTeleOp extends OpMode {
   private Wheels mecanum = new Wheels();
   private Intake intake = new Intake();
 
+  //private boolean goUpChoice = false;
+  //private boolean goDnChoice = false;
 
   @Override
   public void init(){
@@ -82,5 +84,29 @@ public class myTeleOp extends OpMode {
       intake.turnOff();
     }
 
+    //boolean newGoUpChoice = gamepad1.b;
+    //boolean newGoDnChoice = gamepad1.x;
+
+    /*
+    if((goUpChoice == false) && (newGoUpChoice == true)) {
+      intake.testServo(true);
+    } else if ((goDnChoice == false) && (newGoDnChoice == true)){
+      intake.testServo(false);
+    }
+    */
+
+    //goUpChoice = newGoUpChoice;
+    //goDnChoice = newGoDnChoice;
+
+    boolean up = gamepad1.b;
+    boolean down = gamepad1.x;
+
+    if(up){
+      intake.goUp();
+    } else if(down){
+      intake.goDown();
+    }
+
+    intake.update(telemetry);
   }
 }
