@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Hardware;
 
 import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.MineralDeliver;
 import org.firstinspires.ftc.teamcode.Wheels;
 
 @TeleOp(name="Testing teleOP")
@@ -15,6 +16,7 @@ public class myTeleOp extends OpMode {
   //private DcMotor leftDrive = null;
   private Wheels mecanum = new Wheels();
   private Intake intake = new Intake();
+  private MineralDeliver minDel = new MineralDeliver();
 
   //private boolean goUpChoice = false;
   //private boolean goDnChoice = false;
@@ -23,6 +25,7 @@ public class myTeleOp extends OpMode {
   public void init(){
     mecanum.init(hardwareMap);
     intake.init(hardwareMap);
+    minDel.init(hardwareMap);
   }
 
   @Override
@@ -45,13 +48,14 @@ public class myTeleOp extends OpMode {
     telemetry.addData("Status", "Initialized");
     updateWheels();
     updateIntake();
-
+    updateMineral();
     }
 
   @Override
   public void stop(){
     mecanum.stop();
     intake.stop();
+    minDel.stop();
   }
 
 
@@ -108,5 +112,18 @@ public class myTeleOp extends OpMode {
     }
 
     intake.update(telemetry);
+  }
+
+  public void updateMineral(){
+    double mineralMotorPower = -gamepad2.left_stick_y;
+    //double mineralServoPosition = -gamepad2.right_stick_y;
+    //minDel.test(mineralMotorPower, mineralServoPosition);
+    minDel.test(mineralMotorPower);
+    if(gamepad2.left_bumper){
+      minDel.collect();
+    } else if(gamepad2.right_bumper){
+      minDel.dump();
+    }
+    minDel.update(telemetry);
   }
 }
