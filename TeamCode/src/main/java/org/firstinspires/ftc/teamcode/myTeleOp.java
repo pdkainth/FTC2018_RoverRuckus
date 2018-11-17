@@ -7,16 +7,17 @@ import com.qualcomm.robotcore.util.Hardware;
 import org.firstinspires.ftc.teamcode.Intake;
 import org.firstinspires.ftc.teamcode.MineralDeliver;
 import org.firstinspires.ftc.teamcode.Wheels;
+import org.firstinspires.ftc.teamcode.Lift;
 
 @TeleOp(name="Testing teleOP")
 
 public class myTeleOp extends OpMode {
 
   private ElapsedTime runtime = new ElapsedTime();
-  //private DcMotor leftDrive = null;
   private Wheels mecanum = new Wheels();
   private Intake intake = new Intake();
   private MineralDeliver minDel = new MineralDeliver();
+  private Lift lift = new Lift();
 
   //private boolean goUpChoice = false;
   //private boolean goDnChoice = false;
@@ -26,21 +27,16 @@ public class myTeleOp extends OpMode {
     mecanum.init(hardwareMap);
     intake.init(hardwareMap);
     minDel.init(hardwareMap);
+    lift.init(hardwareMap);
   }
 
   @Override
-  public void init_loop(){
-
-  }
-
-
+  public void init_loop(){}
 
   @Override
   public void start(){
     runtime.reset();
   }
-
-
 
   @Override
   public void loop(){
@@ -49,7 +45,8 @@ public class myTeleOp extends OpMode {
     updateWheels();
     updateIntake();
     updateMineral();
-    }
+    updateLift();
+  }
 
   @Override
   public void stop(){
@@ -125,5 +122,11 @@ public class myTeleOp extends OpMode {
       minDel.dump();
     }
     minDel.update(telemetry);
+  }
+
+  public void updateLift(){
+
+    double liftPower = -gamepad2.right_stick_y;
+    lift.lift(liftPower, telemetry);
   }
 }
