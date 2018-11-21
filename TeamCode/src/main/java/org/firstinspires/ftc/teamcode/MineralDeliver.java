@@ -41,12 +41,12 @@ public class MineralDeliver {
   }
 
   public void dump(){
-    servoPosition = 0.8;
+    servoPosition = 1.0;
     mineralServo.setPosition(servoPosition);
   }
 
   public void collect(){
-    servoPosition = 0.05;
+    servoPosition = 0.25;
     mineralServo.setPosition(servoPosition);
   }
   public void update(Telemetry telemetry){
