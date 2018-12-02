@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.MineralDeliver;
 import org.firstinspires.ftc.teamcode.Wheels;
 import org.firstinspires.ftc.teamcode.Lift;
 
-@TeleOp(name="Testing teleOP")
+@TeleOp(name="Main teleOP")
 
 public class myTeleOp extends OpMode {
 
@@ -113,9 +113,7 @@ public class myTeleOp extends OpMode {
 
   public void updateMineral(){
     double mineralMotorPower = -gamepad2.left_stick_y;
-    //double mineralServoPosition = -gamepad2.right_stick_y;
-    //minDel.test(mineralMotorPower, mineralServoPosition);
-    minDel.test(mineralMotorPower);
+    minDel.upDn(mineralMotorPower);
     if(gamepad2.left_bumper){
       minDel.collect();
     } else if(gamepad2.right_bumper){
