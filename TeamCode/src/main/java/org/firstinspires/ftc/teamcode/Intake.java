@@ -37,8 +37,8 @@ public class Intake {
       elapsedTime = new ElapsedTime();
       elapsedTime.reset();
 
-      goUp();
       stop();
+      goUp();
     }
 
     public void turnOn(){
@@ -54,7 +54,6 @@ public class Intake {
     public void goUp(){
       currentPosition = UP_POSITION;
       applyTransferPos();
-
     }
 
     public void goDown(){
@@ -86,5 +85,6 @@ public class Intake {
     public void stop(){
       power = NO_POWER;
       intakeServo.setPower(NO_POWER);
+      controller.setServoPwmDisable(port);
     }
 }

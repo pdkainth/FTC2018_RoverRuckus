@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -19,9 +21,6 @@ public class myTeleOp extends OpMode {
   private MineralDeliver minDel = new MineralDeliver();
   private Lift lift = new Lift();
 
-  //private boolean goUpChoice = false;
-  //private boolean goDnChoice = false;
-
   @Override
   public void init(){
     mecanum.init(hardwareMap);
@@ -31,7 +30,9 @@ public class myTeleOp extends OpMode {
   }
 
   @Override
-  public void init_loop(){}
+  public void init_loop() {
+    intake.update(telemetry);
+  }
 
   @Override
   public void start(){
@@ -55,9 +56,7 @@ public class myTeleOp extends OpMode {
     minDel.stop();
   }
 
-
   public void updateWheels(){
-
 
     double drive = -gamepad1.left_stick_y;
     double strafe = 0.0;
@@ -84,20 +83,6 @@ public class myTeleOp extends OpMode {
     } else if(off){
       intake.turnOff();
     }
-
-    //boolean newGoUpChoice = gamepad1.b;
-    //boolean newGoDnChoice = gamepad1.x;
-
-    /*
-    if((goUpChoice == false) && (newGoUpChoice == true)) {
-      intake.testServo(true);
-    } else if ((goDnChoice == false) && (newGoDnChoice == true)){
-      intake.testServo(false);
-    }
-    */
-
-    //goUpChoice = newGoUpChoice;
-    //goDnChoice = newGoDnChoice;
 
     boolean up = gamepad1.b;
     boolean down = gamepad1.x;
