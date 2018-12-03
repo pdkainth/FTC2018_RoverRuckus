@@ -26,9 +26,26 @@ public class MyAutoDrive {
     },
     START {
       public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
-        return IDLE;
+        return GO_DOWN;
       }
-    };
+    },
+    GO_DOWN{
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        autoDrive.lift.liftToPosition(telemetry, 15000);
+        return WAIT_GO_DOWN_FINISH;
+      }
+    },
+    WAIT_GO_DOWN_FINISH{
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if(autoDrive.lift.isBusy(telemetry)){
+          return WAIT_GO_DOWN_FINISH;
+        } else {
+          return IDLE;
+        }
+      }
+
+    }
+    ;
 
     public abstract AutoState update(MyAutoDrive autoDrive, Telemetry telemetry);
   } // end of AutoState enum
@@ -63,7 +80,7 @@ public class MyAutoDrive {
   public void start(Telemetry telemetry) {
     runtime.reset();
     autoState = AutoState.START;
-    telemetry.addData("AutoStatus", "Started F %s A %s", allianceColor);
+    //telemetry.addData("AutoStatus", "Started F %s A %s", allianceColor);
  }
 
   public void loop(Telemetry telemetry) {
