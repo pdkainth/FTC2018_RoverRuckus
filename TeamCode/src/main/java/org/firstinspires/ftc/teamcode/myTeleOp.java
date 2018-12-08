@@ -62,9 +62,9 @@ public class myTeleOp extends OpMode {
     double strafe = 0.0;
 
     if(gamepad1.dpad_left == true){
-      strafe = -1.0;
+      strafe = -0.6;
     } else if(gamepad1.dpad_right == true){
-      strafe = 1.0;
+      strafe = 0.6;
     }
 
     double rotate = gamepad1.right_stick_x;
@@ -110,6 +110,14 @@ public class myTeleOp extends OpMode {
   public void updateLift(){
 
     double liftPower = -gamepad2.right_stick_y;
-    lift.lift(liftPower, telemetry);
+    lift.lift(liftPower);
+
+    if (gamepad2.b == true) {
+      lift.liftToPosition(Lift.LIFT_ENC_POS_HANG);
+    } else if (gamepad2.a == true) {
+      lift.liftToPosition(Lift.LIFT_ENC_POS_MIN);
+    }
+
+    lift.update(telemetry);
   }
 }

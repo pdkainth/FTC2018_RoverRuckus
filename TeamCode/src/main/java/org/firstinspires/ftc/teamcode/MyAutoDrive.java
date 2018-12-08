@@ -31,21 +31,20 @@ public class MyAutoDrive {
     },
     GO_DOWN{
       public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
-        autoDrive.lift.liftToPosition(telemetry, 15000);
+        autoDrive.lift.resetEncoder();
+        autoDrive.lift.liftToPosition(Lift.LIFT_ENC_POS_HANG);
         return WAIT_GO_DOWN_FINISH;
       }
     },
     WAIT_GO_DOWN_FINISH{
       public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
-        if(autoDrive.lift.isBusy(telemetry)){
+        if(autoDrive.lift.isBusy()){
           return WAIT_GO_DOWN_FINISH;
         } else {
           return IDLE;
         }
       }
-
-    }
-    ;
+    };
 
     public abstract AutoState update(MyAutoDrive autoDrive, Telemetry telemetry);
   } // end of AutoState enum
@@ -53,7 +52,6 @@ public class MyAutoDrive {
   private AllianceColor allianceColor;
 
   private AutoState autoState;
-  private double startTime;
 
   public void init(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     telemetry.addData("AutoStatus", "Initializing");
@@ -80,15 +78,18 @@ public class MyAutoDrive {
   public void start(Telemetry telemetry) {
     runtime.reset();
     autoState = AutoState.START;
-    //telemetry.addData("AutoStatus", "Started F %s A %s", allianceColor);
+    telemetry.addData("AutoStatus", "Started F %s A %s", allianceColor);
  }
 
   public void loop(Telemetry telemetry) {
-    intake.update(telemetry);
     autoState = autoState.update(this, telemetry);
 
     telemetry.addData("AutoStatus", "runtime: %s A %sstates auto %s",
       runtime.toString(), allianceColor, autoState);
+
+    intake.update(telemetry);
+    minDel.update(telemetry);
+    lift.update(telemetry);
   }
 
   public void stop() {
@@ -151,6 +152,7 @@ public class MyAutoDrive {
   public void updateLift(Telemetry telemetry, Gamepad gamepad2){
 
     double liftPower = -gamepad2.right_stick_y;
-    lift.lift(liftPower, telemetry);
+    lift.lift(liftPower);
+    lift.update(telemetry);
   }
 }
