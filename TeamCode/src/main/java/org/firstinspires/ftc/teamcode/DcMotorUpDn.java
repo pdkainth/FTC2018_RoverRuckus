@@ -27,6 +27,7 @@ public class DcMotorUpDn {
     motor.setPower(0.0);
     motor.setDirection(DcMotorSimple.Direction.FORWARD);
     resetEncoder();
+    stop();
 
     touchSensor = hardwareMap.get(TouchSensor.class, touchSensorName);
 
@@ -85,6 +86,7 @@ public class DcMotorUpDn {
   public void stop() {
     opMode = MotorOpMode.IDLE;
     power = 0.0;
+    motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     motor.setPower(0.0);
   }
 

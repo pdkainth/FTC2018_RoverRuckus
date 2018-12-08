@@ -54,6 +54,7 @@ public class myTeleOp extends OpMode {
     mecanum.stop();
     intake.stop();
     minDel.stop();
+    lift.stop();
   }
 
   public void updateWheels(){
@@ -84,8 +85,16 @@ public class myTeleOp extends OpMode {
       intake.turnOff();
     }
 
-    boolean up = gamepad1.b;
-    boolean down = gamepad1.x;
+    if (intake.isOff()) {
+      if (gamepad1.left_trigger > 0.3) {
+        intake.pulse(-gamepad1.left_trigger);
+      } else if (gamepad1.right_trigger > 0.3) {
+        intake.pulse(gamepad1.right_trigger );
+      }
+    }
+
+    boolean up = gamepad1.y;
+    boolean down = gamepad1.a;
 
     if(up){
       intake.goUp();
@@ -97,6 +106,10 @@ public class myTeleOp extends OpMode {
   }
 
   public void updateMineral(){
+    if (gamepad2.dpad_down == true) {
+      minDel.resetEncoder();
+    }
+
     double mineralMotorPower = -gamepad2.left_stick_y;
     minDel.upDn(mineralMotorPower);
     if(gamepad2.left_bumper){
@@ -108,6 +121,9 @@ public class myTeleOp extends OpMode {
   }
 
   public void updateLift(){
+    if (gamepad2.dpad_up == true) {
+      lift.resetEncoder();
+    }
 
     double liftPower = -gamepad2.right_stick_y;
     lift.lift(liftPower);

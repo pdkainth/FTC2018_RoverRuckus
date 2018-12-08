@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -7,9 +8,10 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class MyAutoDrive {
+public class MyAutoDrive extends OpMode {
 
   public enum AllianceColor {UNKNOWN, RED, BLUE}
+  public enum AllianceSide  {UNKNOWN, CRATER, DEPOT}
 
   private ElapsedTime runtime = new ElapsedTime();
 
@@ -49,14 +51,18 @@ public class MyAutoDrive {
     public abstract AutoState update(MyAutoDrive autoDrive, Telemetry telemetry);
   } // end of AutoState enum
 
-  private AllianceColor allianceColor;
+  private AllianceColor allianceColor = AllianceColor.UNKNOWN;
+  private AllianceSide  allianceSide  = AllianceSide.UNKNOWN;
 
   private AutoState autoState;
 
-  public void init(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    telemetry.addData("AutoStatus", "Initializing");
+  public void setAlliance(AllianceColor color, AllianceSide side) {
+    allianceColor = color;
+    allianceSide = side;
+  }
 
-    this.allianceColor = allianceColor;
+  public void init() {
+    telemetry.addData("AutoStatus", "Initializing");
 
     mecanum.init(hardwareMap);
     intake.init(hardwareMap);
@@ -65,27 +71,28 @@ public class MyAutoDrive {
 
     autoState = AutoState.IDLE;
 
-    telemetry.addData("AutoStatus", "Initialized A %s", this.allianceColor);
+    telemetry.addData("AutoStatus", "Initialized A %s %s", allianceColor, allianceSide);
   }
 
-  public void init_loop(Telemetry telemetry, Gamepad gamepad1, Gamepad gamepad2) {
-    updateWheels(telemetry, gamepad1);
-    updateIntake(telemetry, gamepad1);
-    updateMineral(telemetry, gamepad2);
-    updateLift(telemetry, gamepad2);
+  public void init_loop() {
+    updateWheels();
+    updateIntake();
+    updateMineral();
+    updateLift();
   }
 
-  public void start(Telemetry telemetry) {
+  public void start() {
     runtime.reset();
     autoState = AutoState.START;
-    telemetry.addData("AutoStatus", "Started F %s A %s", allianceColor);
+    telemetry.addData("AutoStatus", "Started A %s %s states auto %s",
+        allianceColor, allianceSide, autoState);
  }
 
-  public void loop(Telemetry telemetry) {
+  public void loop() {
     autoState = autoState.update(this, telemetry);
 
-    telemetry.addData("AutoStatus", "runtime: %s A %sstates auto %s",
-      runtime.toString(), allianceColor, autoState);
+    telemetry.addData("AutoStatus", "runtime: %s A %s %s states auto %s",
+      runtime.toString(), allianceColor, allianceSide, autoState);
 
     intake.update(telemetry);
     minDel.update(telemetry);
@@ -96,9 +103,10 @@ public class MyAutoDrive {
     mecanum.stop();
     intake.stop();
     minDel.stop();
+    lift.stop();
   }
 
-  public void updateWheels(Telemetry telemetry, Gamepad gamepad1){
+  public void updateWheels(){
 
     double drive = -gamepad1.left_stick_y;
     double strafe = 0.0;
@@ -115,7 +123,7 @@ public class MyAutoDrive {
     telemetry.addData("Wheel","Wheel power: D: %.2f S: %.2f R: %.2f", drive, strafe, rotate);
   }
 
-  public void updateIntake(Telemetry telemetry, Gamepad gamepad1){
+  public void updateIntake(){
 
     boolean on = gamepad1.right_bumper;
     boolean off = gamepad1.left_bumper;
@@ -138,7 +146,11 @@ public class MyAutoDrive {
     intake.update(telemetry);
   }
 
-  public void updateMineral(Telemetry telemetry, Gamepad gamepad2){
+  public void updateMineral(){
+    if (gamepad2.dpad_down == true) {
+      minDel.resetEncoder();
+    }
+
     double mineralMotorPower = -gamepad2.left_stick_y;
     minDel.upDn(mineralMotorPower);
     if(gamepad2.left_bumper){
@@ -149,7 +161,10 @@ public class MyAutoDrive {
     minDel.update(telemetry);
   }
 
-  public void updateLift(Telemetry telemetry, Gamepad gamepad2){
+  public void updateLift(){
+    if (gamepad2.dpad_up == true) {
+      lift.resetEncoder();
+    }
 
     double liftPower = -gamepad2.right_stick_y;
     lift.lift(liftPower);

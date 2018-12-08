@@ -23,7 +23,9 @@ public class Intake {
     private ServoControllerEx controller;
     private int               port;
 
-    private ElapsedTime       elapsedTime;
+    private ElapsedTime elapsedTime;
+    private ElapsedTime waitTime;
+    private int pulseCnt = 0;
 
     public void init(HardwareMap hardwareMap){
       intakeServo = hardwareMap.get(CRServo.class, "CRservo0");
@@ -35,6 +37,7 @@ public class Intake {
       port = transferServo.getPortNumber();
 
       elapsedTime = new ElapsedTime();
+      waitTime    = new ElapsedTime();
       elapsedTime.reset();
 
       stop();
@@ -49,6 +52,18 @@ public class Intake {
     public void turnOff(){
       power = NO_POWER;
       intakeServo.setPower(power);
+    }
+
+    public boolean isOff() {
+      return (power == NO_POWER);
+    }
+
+    public void pulse(float pulsePower){
+      intakeServo.setPower(pulsePower);
+      waitTime.reset();
+      while (waitTime.milliseconds() < 100.0);
+      turnOff();
+      pulseCnt++;
     }
 
     public void goUp(){
@@ -78,7 +93,7 @@ public class Intake {
         }
       }
 
-      telemetry.addData("IntakeSpinner","power %.2f", power);
+      telemetry.addData("IntakeSpinner","power %.2f pulse %d", power, pulseCnt);
       telemetry.addData("TransferServo", "position" + currentPosition + " power " + on);
     }
 
