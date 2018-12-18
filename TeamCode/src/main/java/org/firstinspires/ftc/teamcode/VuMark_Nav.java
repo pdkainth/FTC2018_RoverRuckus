@@ -29,9 +29,20 @@ public class VuMark_Nav {
   private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
   private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
 
-  private static final float CAMERA_FORWARD_POS_X  =  8.25f * mmPerInch;
-  private static final float CAMERA_VERTICAL_POS_Z =  7.50f * mmPerInch;
-  private static final float CAMERA_LEFT_POS_Y     = -8.00f * mmPerInch;
+  // Data with up mount
+  //private static final float CAMERA_FORWARD_POS_X  =  6.375f * mmPerInch;
+  //private static final float CAMERA_VERTICAL_POS_Z =  15.5f * mmPerInch;
+  //private static final float CAMERA_LEFT_POS_Y     = -8.625f * mmPerInch;
+  //private static final float CAMERA_ROT_DEG_X     = (float)(90.0 + PhoneTilt.PHONE_TILT_DEG_VUFORIA);
+  //private static final float CAMERA_ROT_DEG_Y     = 0.0f;
+
+  // Data with side mount
+  private static final float CAMERA_FORWARD_POS_X  =  2.375f * mmPerInch;
+  private static final float CAMERA_VERTICAL_POS_Z =  10.75f * mmPerInch;
+  private static final float CAMERA_LEFT_POS_Y     = -8.625f * mmPerInch;
+  private static final float CAMERA_ROT_DEG_X     = (float)(90.0 + PhoneTilt.PHONE_TILT_DEG_VUFORIA);
+  private static final float CAMERA_ROT_DEG_Y     = -90.0f;
+
 
   //public static final String TAG = "Vuforia VuMark for FTC";
   private OpenGLMatrix lastLocation = null;
@@ -105,7 +116,7 @@ public class VuMark_Nav {
     OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
         .translation(CAMERA_FORWARD_POS_X, CAMERA_LEFT_POS_Y, CAMERA_VERTICAL_POS_Z)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES,
-            90, 90, 0));
+            CAMERA_ROT_DEG_X, CAMERA_ROT_DEG_Y, 0));
 
     //  Let all the trackable listeners know where the phone is.
     for (VuforiaTrackable trackable : allTrackables)
@@ -146,6 +157,22 @@ public class VuMark_Nav {
     else {
       telemetry.addData("Loc", "none");
     }
+  }
+
+  public boolean isTargetValid() {
+    return targetVisible;
+  }
+
+  public float getPosX() {
+    return (robotTranslation.get(0) / mmPerInch);
+  }
+
+  public float getPosY() {
+    return (robotTranslation.get(1) / mmPerInch);
+  }
+
+  public float getHeading() {
+    return robotRotation.thirdAngle;
   }
 
   public void stop() {
