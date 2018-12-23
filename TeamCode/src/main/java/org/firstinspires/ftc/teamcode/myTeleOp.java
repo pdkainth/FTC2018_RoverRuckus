@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Hardware;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Intake;
 import org.firstinspires.ftc.teamcode.MineralDeliver;
 import org.firstinspires.ftc.teamcode.Wheels;
@@ -20,6 +21,7 @@ public class myTeleOp extends OpMode {
   private Intake intake = new Intake();
   private MineralDeliver minDel = new MineralDeliver();
   private Lift lift = new Lift();
+  private Gyro gyro = new Gyro();
 
   @Override
   public void init(){
@@ -27,6 +29,7 @@ public class myTeleOp extends OpMode {
     intake.init(hardwareMap);
     minDel.init(hardwareMap);
     lift.init(hardwareMap);
+    gyro.init(hardwareMap);
   }
 
   @Override
@@ -47,6 +50,7 @@ public class myTeleOp extends OpMode {
     updateIntake();
     updateMineral();
     updateLift();
+    gyro.update(telemetry);
   }
 
   @Override
@@ -60,8 +64,8 @@ public class myTeleOp extends OpMode {
   public void updateWheels(){
 
     double drive = -gamepad1.left_stick_y;
-    double strafe = 0.0;
 
+    double strafe = 0.0;
     if(gamepad1.dpad_left == true){
       strafe = -0.6;
     } else if(gamepad1.dpad_right == true){
