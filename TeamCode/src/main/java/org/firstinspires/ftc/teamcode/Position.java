@@ -34,6 +34,18 @@ public class Position
     this.angle = angle;
   }
 
+  public void setPos(Position pos) {
+    this.posX = pos.posX;
+    this.posY = pos.posY;
+    this.angle = pos.angle;
+  }
+
+  public void addAngle(float delta){
+    angle += delta;
+    angle = Gyro.convertAngle180(angle);
+  }
+
+
   public float slopeTo(Position toPos) {
     double sloeRad =  Math.atan2(
         (double)(toPos.posY - posY),
