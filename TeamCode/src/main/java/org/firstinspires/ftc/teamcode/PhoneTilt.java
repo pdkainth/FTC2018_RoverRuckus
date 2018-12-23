@@ -16,7 +16,7 @@ public class PhoneTilt {
 
   // With side mount
   public static final double PHONE_TILT_DEG_VUFORIA = 5.7;
-  public static final double PHONE_TILT_DEG_TENSOR_FLOW = 14.0;
+  public static final double PHONE_TILT_DEG_TENSOR_FLOW = 20.0;
 
   private Servo phoneServo;
   double servoPosition;
