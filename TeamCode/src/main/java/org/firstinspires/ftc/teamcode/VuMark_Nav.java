@@ -171,8 +171,20 @@ public class VuMark_Nav {
     return (robotTranslation.get(1) / mmPerInch);
   }
 
+  public String getVisibleTarget() {
+    if (visibleTarget == null) {
+      return "INVALID";
+    } else {
+      return visibleTarget.getName();
+    }
+  }
+
   public float getHeading() {
     return robotRotation.thirdAngle;
+  }
+
+  public VuforiaLocalizer getVuforia() {
+    return vuforia;
   }
 
   public void stop() {

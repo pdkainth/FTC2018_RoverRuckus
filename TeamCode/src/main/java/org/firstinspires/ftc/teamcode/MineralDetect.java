@@ -56,10 +56,15 @@ public class MineralDetect {
     LEFT,
     CENTER,
     RIGHT
-  }  ;
+  };
 
   private VuforiaLocalizer vuforia; //Vuforia localization engine.
   private TFObjectDetector tfod; //Tensor Flow Object Detection engine
+
+  private int numRecognitions = 0;
+  private int goldMineralX = -1;
+  private int silverMineral1X = -1;
+  private int silverMineral2X = -1;
 
   public void init(HardwareMap hardwareMap) {
     // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that first.
@@ -67,6 +72,14 @@ public class MineralDetect {
 
     if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
       initTfod(hardwareMap);
+    } else {
+      tfod = null;
+    }
+  }
+
+  public void init(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
+    if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+      initTfod(hardwareMap, vuforia);
     } else {
       tfod = null;
     }
@@ -94,8 +107,12 @@ public class MineralDetect {
    * Initialize the Tensor Flow Object Detection engine.
    */
   private void initTfod(HardwareMap hardwareMap) {
+    initTfod(hardwareMap, vuforia);
+  }
+
+  private void initTfod(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
     int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-        "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+      "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
     TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
     tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
     tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
@@ -113,10 +130,6 @@ public class MineralDetect {
     Position goldPos = Position.UNKNOWN;
 
     if (tfod != null) {
-      int numRecognitions = 0;
-      int goldMineralX = -1;
-      int silverMineral1X = -1;
-      int silverMineral2X = -1;
 
       // getUpdatedRecognitions() will return null if no new information is available since
       // the last time that call was made.
@@ -155,6 +168,25 @@ public class MineralDetect {
     return goldPos;
   }
 
+  public Position detectUsingLeft2(Telemetry telemetry) {
+    Position goldPos = Position.UNKNOWN;
+    if (numRecognitions == 2) {
+      if (goldMineralX == -1){
+        goldPos = Position.RIGHT;
+      } else {
+        if ((goldMineralX > silverMineral1X) || (goldMineralX > silverMineral2X)) {
+          goldPos = Position.CENTER;
+        } else {
+          goldPos = Position.LEFT;
+        }
+      }
+    }
+
+    telemetry.addData("MineralDetect", "#%d goldLoc %s pos[GSS] %d %d %d ",
+      numRecognitions, goldPos.name(), goldMineralX, silverMineral1X, silverMineral2X);
+
+    return goldPos;
+  }
 
   public void stop() {
     if (tfod != null) {
