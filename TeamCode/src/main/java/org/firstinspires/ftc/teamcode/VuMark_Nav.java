@@ -37,9 +37,9 @@ public class VuMark_Nav {
   //private static final float CAMERA_ROT_DEG_Y     = 0.0f;
 
   // Data with side mount
-  private static final float CAMERA_FORWARD_POS_X  =  2.375f * mmPerInch;
+  private static final float CAMERA_FORWARD_POS_X  =  3.75f * mmPerInch;
   private static final float CAMERA_VERTICAL_POS_Z =  10.75f * mmPerInch;
-  private static final float CAMERA_LEFT_POS_Y     = -8.625f * mmPerInch;
+  private static final float CAMERA_LEFT_POS_Y     = -8.75f * mmPerInch;
   private static final float CAMERA_ROT_DEG_X     = (float)(90.0 + PhoneTilt.PHONE_TILT_DEG_VUFORIA);
   private static final float CAMERA_ROT_DEG_Y     = -90.0f;
 
@@ -180,7 +180,7 @@ public class VuMark_Nav {
   }
 
   public float getHeading() {
-    return robotRotation.thirdAngle;
+    return Gyro.convertAngle180(robotRotation.thirdAngle + 15.0f);
   }
 
   public VuforiaLocalizer getVuforia() {
