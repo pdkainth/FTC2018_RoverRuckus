@@ -9,6 +9,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Wheels {
 
+  public static final double AUTO_DR_POW  = 0.8;
+  public static final double AUTO_ROT_POW = 0.5;
+
   /**
    * Motor 3- front left
    * Motor2 - front right
@@ -72,18 +75,24 @@ public class Wheels {
   public void setTargetDrive(float distanceInch) {
     stop();
     resetEncoder();
-    targetEncPos = (int)Math.round(distanceInch * ENC_CNT_PER_INCH);
+    targetEncPos = (int)Math.round(Math.abs(distanceInch) * ENC_CNT_PER_INCH);
   }
 
   public boolean isTargetDriveDone() {
     int pos = Math.abs(backRightDrive.getCurrentPosition());
     int delta = targetEncPos - pos;
-    if ((delta < STOP_ENC_DRIVE_DELTA) || (pos > targetEncPos)) {
+    if ((Math.abs(delta) < STOP_ENC_DRIVE_DELTA) || (pos > targetEncPos)) {
       stop();
       return true;
     } else {
       return false;
     }
+  }
+
+  public float getRemainingDistance() {
+    int pos = Math.abs(backRightDrive.getCurrentPosition());
+    int delta = targetEncPos - pos;
+    return (Math.abs(delta) / (float)ENC_CNT_PER_INCH);
   }
 
   public void stop() {
