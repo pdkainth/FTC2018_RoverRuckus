@@ -9,5 +9,7 @@ public class AutoDrive_RED_DEPOT extends MyAutoDrive {
   public void init() {
     setAlliance(AllianceColor.RED, AllianceSide.DEPOT);
     super.init();
+
+
   }
 }
