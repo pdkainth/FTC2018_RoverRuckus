@@ -52,10 +52,14 @@ public class MineralDetect {
 
 
   enum Position {
-    UNKNOWN,
-    LEFT,
-    CENTER,
-    RIGHT
+    UNKNOWN { public int indexOf(){return -1;} },
+    LEFT    { public int indexOf(){return 2;} },
+    CENTER  { public int indexOf(){return 1;} },
+    RIGHT   { public int indexOf(){return 0;} };
+
+    public abstract int indexOf();
+
+
   };
 
   private VuforiaLocalizer vuforia; //Vuforia localization engine.
@@ -174,7 +178,7 @@ public class MineralDetect {
       if (goldMineralX == -1){
         goldPos = Position.RIGHT;
       } else {
-        if ((goldMineralX > silverMineral1X) || (goldMineralX > silverMineral2X)) {
+        if (goldMineralX > silverMineral1X) {
           goldPos = Position.CENTER;
         } else {
           goldPos = Position.LEFT;
