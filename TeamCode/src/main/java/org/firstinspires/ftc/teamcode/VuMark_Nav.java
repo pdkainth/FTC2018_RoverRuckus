@@ -43,6 +43,7 @@ public class VuMark_Nav {
   private static final float CAMERA_ROT_DEG_X     = (float)(90.0 + PhoneTilt.PHONE_TILT_DEG_VUFORIA);
   private static final float CAMERA_ROT_DEG_Y     = -90.0f;
 
+  private MyAutoDrive.AllianceColor allianceColor = MyAutoDrive.AllianceColor.UNKNOWN;
 
   //public static final String TAG = "Vuforia VuMark for FTC";
   private OpenGLMatrix lastLocation = null;
@@ -66,6 +67,9 @@ public class VuMark_Nav {
   VectorF robotTranslation;
   Orientation robotRotation;
 
+  public void setAllianceColor(MyAutoDrive.AllianceColor color) {
+    allianceColor = color;
+  }
 
   public void init(HardwareMap hardwareMap) {
     cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -92,26 +96,50 @@ public class VuMark_Nav {
     // For convenience, gather together all the trackable objects in one easily-iterable collection */
     allTrackables.addAll(targetsRoverRuckus);
 
-    // Place target on the field
-    OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
-        .translation(0, mmFTCFieldWidth, mmTargetHeight)
-        .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0));
-    blueRover.setLocation(blueRoverLocationOnField);
+    float angleZrot = 0.0f;
+    if (allianceColor == MyAutoDrive.AllianceColor.RED) {
+      // Place target on the field
+      OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
+          .translation(0, mmFTCFieldWidth, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0));
+      redFootprint.setLocation(blueRoverLocationOnField);
 
-    OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
-        .translation(0, -mmFTCFieldWidth, mmTargetHeight)
-        .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180));
-    redFootprint.setLocation(redFootprintLocationOnField);
+      OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
+          .translation(0, -mmFTCFieldWidth, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180));
+      blueRover.setLocation(redFootprintLocationOnField);
 
-    OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
-        .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
-        .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90));
-    frontCraters.setLocation(frontCratersLocationOnField);
+      OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
+          .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90));
+      backSpace.setLocation(frontCratersLocationOnField);
 
-    OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
-        .translation(mmFTCFieldWidth, 0, mmTargetHeight)
-        .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90));
-    backSpace.setLocation(backSpaceLocationOnField);
+      OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
+          .translation(mmFTCFieldWidth, 0, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90));
+      frontCraters.setLocation(backSpaceLocationOnField);
+    } else {
+      // Place target on the field
+      OpenGLMatrix blueRoverLocationOnField = OpenGLMatrix
+          .translation(0, mmFTCFieldWidth, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0));
+      blueRover.setLocation(blueRoverLocationOnField);
+
+      OpenGLMatrix redFootprintLocationOnField = OpenGLMatrix
+          .translation(0, -mmFTCFieldWidth, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180));
+      redFootprint.setLocation(redFootprintLocationOnField);
+
+      OpenGLMatrix frontCratersLocationOnField = OpenGLMatrix
+          .translation(-mmFTCFieldWidth, 0, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90));
+      frontCraters.setLocation(frontCratersLocationOnField);
+
+      OpenGLMatrix backSpaceLocationOnField = OpenGLMatrix
+          .translation(mmFTCFieldWidth, 0, mmTargetHeight)
+          .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90));
+      backSpace.setLocation(backSpaceLocationOnField);
+    }
 
     OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
         .translation(CAMERA_FORWARD_POS_X, CAMERA_LEFT_POS_Y, CAMERA_VERTICAL_POS_Z)
