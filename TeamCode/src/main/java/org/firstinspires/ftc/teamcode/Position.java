@@ -59,6 +59,11 @@ public class Position
     return (float) Math.sqrt(distanceSq);
   }
 
+  public void translate(float distance) {
+    posX = posX + distance * (float)Math.cos(Math.toRadians(angle));
+    posY = posY + distance * (float)Math.sin(Math.toRadians(angle));
+  }
+
   public String toString() {
     return String.format("X %.1f Y %.1f A %.1f", posX, posY, angle);
   }
