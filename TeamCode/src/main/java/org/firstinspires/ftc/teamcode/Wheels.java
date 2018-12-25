@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Wheels {
 
-  public static final double AUTO_DR_POW  = 0.8;
-  public static final double AUTO_ROT_POW = 0.5;
+  public static final double AUTO_DR_POW  = 1.0;
+  public static final double AUTO_ROT_POW = 0.8;
 
   /**
    * Motor 3- front left
