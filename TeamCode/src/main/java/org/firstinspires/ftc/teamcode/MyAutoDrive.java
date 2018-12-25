@@ -25,6 +25,9 @@ public class MyAutoDrive extends OpMode {
   private MineralDetect mineralDetect = new MineralDetect();
 
   protected AutoRoute autoRoute = new AutoRoute();
+  int depotDriveIdx = 0;
+
+  ElapsedTime minDelWaitTime = new ElapsedTime();
 
   Position robotPos = new Position();
   Position targetPos  = new Position();
@@ -103,11 +106,49 @@ public class MyAutoDrive extends OpMode {
         if (autoDrive.goldMineralPos == MineralDetect.Position.UNKNOWN) {
           return TFO_SCAN;
         } else {
-          return SET_MOVE_AWAY_FROM_LANDER;
+          return SET_PRE_VUFORIA_ROT ;
         }
       }
     },
 
+    SET_PRE_VUFORIA_ROT {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if (autoDrive.autoRoute.preVuforiaDrive != 0.0f) {
+          autoDrive.targetAngle = autoDrive.autoRoute.preVuforiaAngle;
+          autoDrive.rotState = Rotate.START;
+          return PRE_VUFORIA_ROT;
+        } else {
+          return SET_MOVE_AWAY_FROM_LANDER;
+        }
+      }
+    },
+    PRE_VUFORIA_ROT {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if(autoDrive.rotState != Rotate.IDLE){
+          autoDrive.rotState = autoDrive.rotState.update(autoDrive);
+          return PRE_VUFORIA_ROT;
+        } else {
+          return SET_PRE_VUFORIA_DRIVE;
+        }
+      }
+    },
+    SET_PRE_VUFORIA_DRIVE {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        autoDrive.driveDistance = autoDrive.autoRoute.preVuforiaDrive;
+        autoDrive.driveState = Drive.START;
+        return PRE_VUFORIA_DRIVE;
+      }
+    },
+    PRE_VUFORIA_DRIVE {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if (autoDrive.driveState != Drive.IDLE){
+          autoDrive.driveState = autoDrive.driveState.update(autoDrive);
+          return PRE_VUFORIA_DRIVE;
+        } else {
+          return SET_MOVE_AWAY_FROM_LANDER;
+        }
+      }
+    },
     SET_MOVE_AWAY_FROM_LANDER{
       public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry){
         autoDrive.targetAngle = autoDrive.autoRoute.vuforiaAngle;
@@ -181,6 +222,7 @@ public class MyAutoDrive extends OpMode {
           autoDrive.driveState = autoDrive.driveState.update(autoDrive);
           return WAIT_FOR_KNOCKOUT;
         } else {
+          autoDrive.robotPos.translate(autoDrive.driveDistance);
           return SET_MINERAL_KNOCKOUT_MOVE_BACK;
         }
       }
@@ -188,9 +230,13 @@ public class MyAutoDrive extends OpMode {
     SET_MINERAL_KNOCKOUT_MOVE_BACK{
       public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
         int mineralPosIndex = autoDrive.goldMineralPos.indexOf();
-        autoDrive.driveDistance = autoDrive.autoRoute.mineralMoveDistance[mineralPosIndex] * -1.0f;
-        autoDrive.driveState = Drive.START;
-        return WAIT_FOR_KNOCKOUT_MOVE_BACK;
+        autoDrive.driveDistance = autoDrive.autoRoute.mineralMoveBackDistance[mineralPosIndex] * -1.0f;
+        if (autoDrive.driveDistance != 0.0f) {
+          autoDrive.driveState = Drive.START;
+          return WAIT_FOR_KNOCKOUT_MOVE_BACK;
+        } else {
+          return SET_DEPOT_DRIVE;
+        }
       }
     },
     WAIT_FOR_KNOCKOUT_MOVE_BACK{
@@ -199,7 +245,54 @@ public class MyAutoDrive extends OpMode {
           autoDrive.driveState = autoDrive.driveState.update(autoDrive);
           return WAIT_FOR_KNOCKOUT_MOVE_BACK;
         } else {
+          autoDrive.robotPos.translate(autoDrive.driveDistance);
+          return SET_DEPOT_DRIVE;
+        }
+      }
+    },
+    SET_DEPOT_DRIVE {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        int mineralPosIndex = autoDrive.goldMineralPos.indexOf();
+        if (autoDrive.autoRoute.numDepotRoutePos[mineralPosIndex] > 0){
+          autoDrive.targetPos.setPos(autoDrive.autoRoute.depotRoutePos[mineralPosIndex][autoDrive.depotDriveIdx]);
+          autoDrive.gotoTargetState = GoToTargetPos.START;
+          return DEPOT_DRIVE;
+        } else {
           return IDLE;
+        }
+      }
+    },
+    DEPOT_DRIVE {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if (autoDrive.gotoTargetState != GoToTargetPos.IDLE) {
+          autoDrive.gotoTargetState = autoDrive.gotoTargetState.update(autoDrive);
+          return DEPOT_DRIVE;
+        } else {
+          int mineralPosIndex = autoDrive.goldMineralPos.indexOf();
+          autoDrive.robotPos.setPos(autoDrive.autoRoute.depotRoutePos[mineralPosIndex][autoDrive.depotDriveIdx]);
+          autoDrive.depotDriveIdx++;
+          if (autoDrive.depotDriveIdx < autoDrive.autoRoute.numDepotRoutePos[mineralPosIndex]) {
+            return SET_DEPOT_DRIVE;
+          } else {
+            return DROP_MARKER;
+          }
+        }
+      }
+    },
+    DROP_MARKER {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        autoDrive.minDel.dump();
+        autoDrive.minDelWaitTime.reset();
+        return DROP_MARKER_WAIT;
+      }
+    },
+    DROP_MARKER_WAIT {
+      public AutoState update(MyAutoDrive autoDrive, Telemetry telemetry) {
+        if (autoDrive.minDelWaitTime.seconds() > 1.0) {
+          autoDrive.minDel.collect();
+          return IDLE;
+        } else {
+          return DROP_MARKER_WAIT;
         }
       }
     }
@@ -228,9 +321,11 @@ public class MyAutoDrive extends OpMode {
           return IDLE;
         } else {
           op.rotPower = Math.signum(op.angleDelta) * Wheels.AUTO_ROT_POW;
-          //if (Math.abs(op.angleDelta) < 15.0f) {
-          //  op.rotPower = ((Wheels.AUTO_ROT_POW * 0.5)* (Math.abs(op.angleDelta) / 15.0f)) + (Wheels.AUTO_ROT_POW * 0.5);
-          //}
+          if (Math.abs(op.angleDelta) < 20.0f) {
+            op.rotPower = (op.rotPower * 0.5);
+          } else if (Math.abs(op.angleDelta) < 40.0f) {
+            op.rotPower = ((op.rotPower * 0.5)* ((Math.abs(op.angleDelta) - 20.0f) / 20.0f)) + (op.rotPower * 0.5);
+          }
           op.mecanum.drive(0.0, 0.0f, op.rotPower, op.telemetry);
           return TURN;
         }
@@ -265,9 +360,11 @@ public class MyAutoDrive extends OpMode {
           return IDLE;
         } else {
           float distRemain = op.mecanum.getRemainingDistance();
+          op.drivePower = Wheels.AUTO_DR_POW * Math.signum(op.driveDistance);
           if (distRemain < 6.0f) {
-            op.drivePower = Wheels.AUTO_DR_POW * Math.signum(op.driveDistance);
-            op.drivePower = ((op.drivePower * 0.5) * (distRemain / 6.0f)) + (op.drivePower * 0.5);
+            op.drivePower = (op.drivePower * 0.5);
+          } else if (distRemain < 12.0f) {
+            op.drivePower = ((op.drivePower * 0.5) * ((distRemain - 6.0f) / 6.0f)) + (op.drivePower * 0.5);
             op.mecanum.drive(op.drivePower, 0.0, 0.0, op.telemetry);
           }
           return MOVE;
@@ -345,10 +442,17 @@ public class MyAutoDrive extends OpMode {
     intake.init(hardwareMap);
     minDel.init(hardwareMap);
     lift.init(hardwareMap);
+    nav.setAllianceColor(allianceColor);
     nav.init(hardwareMap);
     gyro.init(hardwareMap);
     phoneTilt.init(hardwareMap);
     mineralDetect.init(hardwareMap, nav.getVuforia());
+
+    if (allianceSide == AllianceSide.DEPOT) {
+      autoRoute.setDepotRoutePos();
+    } else {
+      autoRoute.setCraterRoutePos();
+    }
 
     autoState = AutoState.IDLE;
 
@@ -388,8 +492,8 @@ public class MyAutoDrive extends OpMode {
       autoState, gotoTargetState, driveState, rotState, nav.getVisibleTarget(), goldMineralPos);
     telemetry.addData("AutoDrive", "POS target %s cur %s target angle %.1f dist %.1f",
       targetPos, robotPos, targetAngle, driveDistance);
-    telemetry.addData("AutoDriveDebug", "drPow %.1f rotPow %.1f deltaAngle %.1f",
-      drivePower, rotPower, angleDelta);
+    telemetry.addData("AutoDriveDebug", "drPow %.1f rotPow %.1f deltaAngle %.1f depDrIdx %d",
+      drivePower, rotPower, angleDelta, depotDriveIdx);
   }
 
   public void stop() {
