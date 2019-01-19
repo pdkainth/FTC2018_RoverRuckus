@@ -20,6 +20,10 @@ public class MineralDeliver extends DcMotorUpDn {
     super.lift(power);
   }
 
+  public void bringDown() {
+    super.liftToPosition(0);
+  }
+
   public void dump(){
     servoPosition = 1.0;
     mineralServo.setPosition(servoPosition);

@@ -114,6 +114,10 @@ public class myTeleOp extends OpMode {
       minDel.resetEncoder();
     }
 
+    if (gamepad2.x == true) {
+      minDel.bringDown();
+    }
+
     double mineralMotorPower = -gamepad2.left_stick_y;
     minDel.upDn(mineralMotorPower);
     if(gamepad2.left_bumper){
