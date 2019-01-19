@@ -470,7 +470,7 @@ public class MyAutoDrive extends OpMode {
     runtime.reset();
     gyro.updateHeadingOffset(autoRoute.landingPos.angle);
     robotPos.setPos(autoRoute.landingPos);
-    autoState = AutoState.PREP_TFO_SCAN;
+    autoState = AutoState.START;
     phoneTilt.setPhoneTilt(PhoneTilt.PHONE_TILT_DEG_VUFORIA);
     telemetry.addData("AutoStatus", "Started A %s %s states auto %s",
         allianceColor, allianceSide, autoState);
